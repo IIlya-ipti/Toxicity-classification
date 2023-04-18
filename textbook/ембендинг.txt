@@ -1,0 +1,15 @@
+.Embedding(
+    input_dim,
+    output_dim,
+    input_length)
+Создается векторное представления каждого слова в словаре
+допустим, число элементов в словаре 4, тогда
+будет
+0->  [random_number] * ouuput_dim (0_vector)
+1->  [random_number] * ouuput_dim (1_vector)
+2->  [random_number] * ouuput_dim (2_vector)
+...
+input_dim - 1 ->  [random_number] * ouuput_dim
+
+и на выходе выдается последовательность векторов
+[1,2,3,..] -> [0_vector,1_vector,2_vector,...]

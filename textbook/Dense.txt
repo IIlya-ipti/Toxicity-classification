@@ -1,0 +1,6 @@
+Dense - полносвязная нейронная сеть
+output = activation(dot(input, kernel) + bias) 
+kerner - матрица весов
+units - количество нейронов 
+
+выходная размерность (None, shape(x)) -> (None,units)

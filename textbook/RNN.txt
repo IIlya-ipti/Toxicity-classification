@@ -1,0 +1,1 @@
+https://qudata.com/ml/ru/NN_RNN_Keras.html#SimpleRNN
