@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from keras.models import Sequential
 from tensorflow.keras.layers import LSTM, GRU,SimpleRNN,Embedding,BatchNormalization
-from keras.layers.core import Dense, Activation, Dropout, Input
+from keras.layers.core import Activation, Dropout
+from tensorflow.keras.layers import Dense, Input
 import transformers
 import tensorflow as tf
 from tensorflow.keras.models import Model
@@ -30,22 +31,22 @@ def roc_auc(predictions,target):
     return roc_auc
 
 class FirstNeuro(NeuroParent):
-    def __init__(self, dm):
-        self.data_manager = dm
+    def __init__(self, tok, max_len):
+        self.token = tok
         self.model = Sequential()
-        self.model.add(Embedding(len(dm.get_word_index()) + 1,
+        self.model.add(Embedding(len(tok.get_word_index()) + 1,
                 300,
-                input_length=dm.get_max_len_sequence()))
+                input_length=max_len))
         self.model.add(LSTM(50,dropout=0.3))
         self.model.add(Dense(1))
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     def train(self):
 
-        self.model.fit(*self.data_manager.get_train_data(), epochs=5, batch_size=20)
+        self.model.fit(self.token.get_xtrain(), self.token.get_ytrain(), epochs=5, batch_size=20)
 
     def test(self):
-        scores = self.model.predict(self.data_manager.get_test_data()[0])
-        print("Auc: %.2f%%" % (roc_auc(scores,self.data_manager.get_test_data()[1])))
+        scores = self.model.predict(self.tok.get_xvalid)
+        print("Auc: %.2f%%" % (roc_auc(scores,self.tok.get_yvalid())))
 
 class SecondNeuto(NeuroParent):
     def __init__(self, word_index, embedding_matrix, max_len=1500) :
@@ -98,13 +99,32 @@ class Bert(NeuroParent):
     
         self.model = Model(inputs=input_word_ids, outputs=out)
         self.model.compile(Adam(lr=1e-5), loss='binary_crossentropy', metrics=['accuracy'])
-    def train(self):
+
+    def train(self, x_train, y_train, x_valid, y_valid):
+        AUTO = tf.data.experimental.AUTOTUNE
+        BATCH_SIZE = 128
+
+        train_dataset = (
+            tf.data.Dataset
+            .from_tensor_slices((x_train, y_train))
+            .repeat()
+            .shuffle(2048)
+            .batch(BATCH_SIZE)
+            .prefetch(AUTO))
+        valid_dataset = (
+            tf.data.Dataset
+            .from_tensor_slices((x_valid, y_valid))
+            .batch(BATCH_SIZE)
+            .cache()
+            .prefetch(AUTO))
+
         self.model.fit(
-    train_dataset,
-    steps_per_epoch=n_steps,
-    validation_data=valid_dataset,
-    epochs=5
-)
+            train_dataset,
+            steps_per_epoch=x_train.shape[0],
+            validation_data=valid_dataset,
+            epochs=5)
+        def test(self, test_dataset):
+            return self.model.predict(test_dataset, verbose=1)
 class testNeuro:
     def __init__(self) -> None:
         pass
