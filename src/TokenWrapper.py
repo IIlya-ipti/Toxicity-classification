@@ -1,8 +1,12 @@
 
 from keras.preprocessing.text import Tokenizer
-
+import pickle
 from keras.utils import pad_sequences
 from abc import ABC, abstractmethod
+from tqdm import tqdm
+import numpy as np
+from tokenizers import BertWordPieceTokenizer
+import transformers
 
 class ITokenWrapper(ABC):
     
@@ -16,24 +20,20 @@ class ITokenWrapper(ABC):
     def load(self):
         pass
     
-    @classmethod
-    @abstractmethod
-    def init(self):
-        pass
+    
 
-    @classmethod
-    @abstractmethod
-    def test(self):
-        pass
+
     
 
 class TokenSimple(ITokenWrapper):
     def __init__(self, xtrain, xvalid, max_len_sequence, load_mode=False):
         self.max_len_sequence = max_len_sequence
+        self.xtrain = xtrain
+        self.xvalid = xvalid
         if load_mode:
-            load()
+            self.load()
         else:
-            save()
+            self.save()
 
     def load(self):
         with open('data/tokenizer.pickle', 'rb') as handle:
@@ -56,9 +56,9 @@ class TokenSimple(ITokenWrapper):
 class BertToken(ITokenWrapper):
     def __init__(self, load_mode=False):
         if load_mode:
-            load()
+            self.load()
         else:
-            save()    
+            self.save()    
 
 
     def fast_encode(texts, tokenizer, chunk_size=256, maxlen=512):
@@ -81,7 +81,7 @@ class BertToken(ITokenWrapper):
     def save(self):
         tokenizer = transformers.DistilBertTokenizer.from_pretrained('distilbert-base-multilingual-cased')
         tokenizer.save_pretrained('data/')
-        load()
+        
 
     def get_features(self, data):
-        return fast_encode(data,self.fast_tokenizer) 
+        return self.fast_encode(data,self.fast_tokenizer) 

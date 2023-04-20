@@ -42,7 +42,7 @@ class FirstNeuro(NeuroParent):
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     def train(self):
 
-        self.model.fit(self.token.get_xtrain(), self.token.get_ytrain(), epochs=5, batch_size=20)
+        self.model.fit(*self.token.get_features(), epochs=5, batch_size=20)
 
     def test(self):
         scores = self.model.predict(self.tok.get_xvalid)
