@@ -14,13 +14,10 @@ class DataManagerInterFace(ABC):
     
     @classmethod
     @abstractmethod
-    def get_train_data(self):
+    def get_xtrain(self):
         pass
 
-    @classmethod
-    @abstractmethod
-    def get_test_data(self):
-        pass
+    
 
 
 class DataManager(DataManagerInterFace):
