@@ -61,17 +61,17 @@ class BertToken(ITokenWrapper):
             self.save()    
 
 
-    def fast_encode(texts, tokenizer, chunk_size=256, maxlen=512):
+    def fast_encode(self, texts, chunk_size=256, maxlen=512):
         """
         Encoder for encoding the text into sequence of integers for BERT Input
         """
-        tokenizer.enable_truncation(max_length=maxlen)
-        tokenizer.enable_padding(max_length=maxlen)
+        self.fast_tokenizer.enable_truncation(max_length=maxlen)
+        self.fast_tokenizer.enable_padding(length=maxlen)
         all_ids = []
         
         for i in tqdm(range(0, len(texts), chunk_size)):
             text_chunk = texts[i:i+chunk_size].tolist()
-            encs = tokenizer.encode_batch(text_chunk)
+            encs = self.fast_tokenizer.encode_batch(text_chunk)
             all_ids.extend([enc.ids for enc in encs])
         return np.array(all_ids)
 
@@ -81,7 +81,8 @@ class BertToken(ITokenWrapper):
     def save(self):
         tokenizer = transformers.DistilBertTokenizer.from_pretrained('distilbert-base-multilingual-cased')
         tokenizer.save_pretrained('data/')
+        self.load()
         
 
     def get_features(self, data):
-        return self.fast_encode(data,self.fast_tokenizer) 
+        return self.fast_encode(data) 
