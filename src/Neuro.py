@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
 from keras.models import Sequential
 from tensorflow.keras.layers import LSTM, GRU,SimpleRNN,Embedding,BatchNormalization
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.core import Dense, Activation, Dropout, Input
+import transformers
 import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+
 from sklearn import preprocessing, decomposition, model_selection, metrics, pipeline
 class NeuroParent(ABC):
     
@@ -24,6 +28,7 @@ def roc_auc(predictions,target):
     fpr, tpr, thresholds = metrics.roc_curve(target, predictions)
     roc_auc = metrics.auc(fpr, tpr)
     return roc_auc
+
 class FirstNeuro(NeuroParent):
     def __init__(self, dm):
         self.data_manager = dm
@@ -81,6 +86,25 @@ class SecondNeuto(NeuroParent):
     def test(self, xvalid):
         return self.model.predict(xvalid)'''
 
+
+class Bert(NeuroParent):
+    def __init__(self, max_len=512) -> None:
+    
+        input_word_ids = Input(shape=(max_len,), dtype=tf.int32, name="input_word_ids")
+        transformer = transformers.TFDistilBertModel.from_pretrained('distilbert-base-multilingual-cased')
+        sequence_output = transformer(input_word_ids)[0]
+        cls_token = sequence_output[:, 0, :]
+        out = Dense(1, activation='sigmoid')(cls_token)
+    
+        self.model = Model(inputs=input_word_ids, outputs=out)
+        self.model.compile(Adam(lr=1e-5), loss='binary_crossentropy', metrics=['accuracy'])
+    def train(self):
+        self.model.fit(
+    train_dataset,
+    steps_per_epoch=n_steps,
+    validation_data=valid_dataset,
+    epochs=5
+)
 class testNeuro:
     def __init__(self) -> None:
         pass

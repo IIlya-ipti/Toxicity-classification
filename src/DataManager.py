@@ -27,6 +27,9 @@ class DataManagerInterFace(ABC):
     def get_word_index(self):
         pass
 
+    def processing_data(self, data: str):
+        return self.__to_sequence(data)
+
     def __load_tokenizer(self):
         with open('data/tokenizer.pickle', 'rb') as handle:
             self.token = pickle.load(handle)
@@ -71,7 +74,6 @@ class DataManager(DataManagerInterFace):
         self.xvalid_pad =  self._DataManagerInterFace__to_sequence(self.xvalid)
         self.word_index = self.token.word_index
 
-    
 
     def get_train_data(self):
         # return (X_train,y_train)
