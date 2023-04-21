@@ -26,14 +26,15 @@ class ITokenWrapper(ABC):
     
 
 class TokenSimple(ITokenWrapper):
-    def __init__(self, xtrain, xvalid, max_len_sequence, load_mode=False):
+    def __init__(self, xtrain, xvalid, max_len_sequence):
         self.max_len_sequence = max_len_sequence
         self.xtrain = xtrain
         self.xvalid = xvalid
-        if load_mode:
-            self.load()
-        else:
-            self.save()
+        self.save()
+
+    def __init__(self, max_len_sequence):
+        self.max_len_sequence = max_len_sequence
+        self.load()
 
     def load(self):
         with open('data/tokenizer.pickle', 'rb') as handle:
@@ -50,39 +51,6 @@ class TokenSimple(ITokenWrapper):
 
     def get_word_index(self):
         return self.token.word_index
-
     
-
-class BertToken(ITokenWrapper):
-    def __init__(self, load_mode=False):
-        if load_mode:
-            self.load()
-        else:
-            self.save()    
-
-
-    def fast_encode(self, texts, chunk_size=256, maxlen=512):
-        """
-        Encoder for encoding the text into sequence of integers for BERT Input
-        """
-        self.fast_tokenizer.enable_truncation(max_length=maxlen)
-        self.fast_tokenizer.enable_padding(length=maxlen)
-        all_ids = []
-        
-        for i in tqdm(range(0, len(texts), chunk_size)):
-            text_chunk = texts[i:i+chunk_size].tolist()
-            encs = self.fast_tokenizer.encode_batch(text_chunk)
-            all_ids.extend([enc.ids for enc in encs])
-        return np.array(all_ids)
-
-    def load(self):
-        self.fast_tokenizer = BertWordPieceTokenizer('data/vocab.txt', lowercase=False)
-    
-    def save(self):
-        tokenizer = transformers.DistilBertTokenizer.from_pretrained('distilbert-base-multilingual-cased')
-        tokenizer.save_pretrained('data/')
-        self.load()
-        
-
-    def get_features(self, data):
-        return self.fast_encode(data) 
+    def get_max_len(self):
+        return self.max_len_sequence
