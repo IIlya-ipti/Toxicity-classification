@@ -34,6 +34,9 @@ class TokenSimple(ITokenWrapper):
             self.load()
         else:
             self.save()
+    def __init__(self, max_len_sequence=1503):
+        self.max_len_sequence = max_len_sequence
+        self.load()
 
     def load(self):
         with open('data/tokenizer.pickle', 'rb') as handle:

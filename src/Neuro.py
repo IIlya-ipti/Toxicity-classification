@@ -57,15 +57,14 @@ class LSTMNeuro(NeuroParent):
         self.model.add(Embedding(len(tok.get_word_index()) + 1,
                 100,
                 input_length=tok.get_max_len()))
-        self.model.add(LSTM(50,dropout=0.3))
+        self.model.add(LSTM(100,dropout=0.3))
         self.model.add(Dense(1))
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
 
 class TransformerNeuro(NeuroParent):
     def __init__(self, tok):
         self.token = tok
-        embed_dim = 100  # Embedding size for each token
+        embed_dim = 300  # Embedding size for each token
         num_heads = 2  # Number of attention heads
         ff_dim = 32  # Hidden layer size in feed forward network inside transformer
 
